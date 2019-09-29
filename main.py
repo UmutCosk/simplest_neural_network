@@ -27,12 +27,11 @@ def sigmoid(w, b, x):
 def train(w, b, x):
     y_est = sigmoid(w, b, x)
     error = y - y_est
-    error_continues = error * np.dot(y_est, 1-y_est)
-    d_w = learning_rate * np.outer(error_continues, x)
-    d_b = learning_rate * error_continues
+    d_w = learning_rate * np.outer(error, x)
+    d_b = learning_rate * error
     w = w+d_w
     b = b+d_b
-    return w, b, y_est, error
+    return w, b, y_est
 
 
 def cost_func(y, y_est):
@@ -80,7 +79,7 @@ max_iterations = 1000
 accuracy_score = calc_accuracy(y, sigmoid(w, b, x))
 iterations = 0
 while(accuracy_score*100 < score):
-    w, b, y_est, error = train(w, b, x)
+    w, b, y_est = train(w, b, x)
     accuracy_score = calc_accuracy(y, y_est)
     iterations += 1
     if(iterations == max_iterations):
