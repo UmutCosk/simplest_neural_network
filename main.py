@@ -1,56 +1,91 @@
 import numpy as np
+from sklearn.metrics import accuracy_score
 
 # Inputs
-x = np.array([2, 3])
+x = np.array([2, 3, 1, -3])
 # Randomly choosen weights
-w = np.array([0.34, 0.1])
+w = np.array([[0.34, 0.1, 0.5, -0.7],
+              [0.14, 0.4, 0.2, -0.5],
+              [-0.34, -0.3, -0.5, 0.7]])
 # Randomly choosen bias
-b = np.array([0.54])
+b = np.array([0, 1, -2])
 # Wanted Output
-y = np.array([0.5])
+y = np.array([0.5, 0.1, 0.9])
 # Estimated Output
-y_est = np.array([0])
-# Learning Rate
+y_est = np.array([np.zeros(len(y))])
+# Learning Rate (for not overshooting)
 learning_rate = 0.1
 
 
 # Activation Function
-def sigmoid(w, x, b):
+def sigmoid(w, b, x):
     y_est = np.dot(w, x)+b
-    result = 1 / (1+np.exp(-y_est))
-    return y_est
+    return 1 / (1+np.exp(-y_est))
 
 
 # Gradient Descent
-def train(w, x, b):
-    y_est = sigmoid(w, x, b)
-    error = calc_error(y, y_est)
-    d_w = learning_rate * error * y_est * (1 - y_est) * x
-    d_b = learning_rate * error * y_est * (1 - y_est)
-    if(error < 0):
-        w = w-d_w
-        b = b-d_b
-    else:
-        w = w+d_w
-        b = b+d_b
-
+def train(w, b, x):
+    y_est = sigmoid(w, b, x)
+    error = y - y_est
+    error_continues = error * np.dot(y_est, 1-y_est)
+    d_w = learning_rate * np.outer(error_continues, x)
+    d_b = learning_rate * error_continues
+    w = w+d_w
+    b = b+d_b
     return w, b, y_est, error
 
 
-def calc_error(y, y_est):
-    m = len(y)
-    quad_err = list(map(lambda a, b: (a-b)**2, y, y_est))
-    error = np.sum(quad_err) / m
-    return error
+def cost_func(y, y_est):
+    err = list(map(lambda a, b: (a-b)**2, y, y_est))
+    return np.sum(err)
 
 
-if __name__ == "__main__":
-    # Training until error is lower then threshold
-    threshold = 0.0001
-    while(calc_error(y, y_est) > threshold):
-        w, b, y_est, error = train(w, x, b)
+def calc_accuracy(y, y_est):
+    total_accuracy = []
+    for a, b in zip(y, y_est):
+        if(a == 0 or b == 0):
+            total_accuracy.append(0)
+        else:
+            if(a > b):
+                total_accuracy.append(b/a)
+            else:
+                total_accuracy.append(a/b)
+    return np.prod(total_accuracy)
 
-    print("Your new weights are: "+str(w))
-    print("Your new biases are: "+str(b))
-    accuracy = str((y_est/y*100))
-    print("Your model is "+accuracy + "% accurate!")
+
+def print_results(w, b, y_est, iterations):
+    print("Your new weights are: \n"+str(w)+"\n")
+    print("Your new biases are: \n"+str(b)+"\n")
+    print("Your new estimation is \n"+str(y_est)+"\n")
+    print("Your models accuracy is: \n"+str(calc_accuracy(y, y_est)
+                                            * 100) + " % with "+str(iterations)+" iterations")
+
+
+"""Error Handling"""
+if(not len(b) == len(y)):
+    raise Exception("\nOutput not same dimension as bias ")
+for output in y:
+    if(output < 0 or output > 1):
+        raise Exception("\nOutputs not between 0 and 1")
+dim_y, dim_x = w.shape
+if(not dim_y == len(y)):
+    raise Exception("\nWeights rows not same as output length")
+if(not dim_x == len(x)):
+    raise Exception("\nWeights columns not same as input length")
+
+
+""" Training """
+score = 97
+max_iterations = 1000
+accuracy_score = calc_accuracy(y, sigmoid(w, b, x))
+iterations = 0
+while(accuracy_score*100 < score):
+    w, b, y_est, error = train(w, b, x)
+    accuracy_score = calc_accuracy(y, y_est)
+    iterations += 1
+    if(iterations == max_iterations):
+        print("\nReached max. Iterations!")
+        break
+
+print_results(w, b, y_est, iterations)
+calc_accuracy(y, y_est)
