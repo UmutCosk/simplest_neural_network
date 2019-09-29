@@ -1,14 +1,11 @@
 import numpy as np
-from sklearn.metrics import accuracy_score
 
 # Inputs
 x = np.array([2, 3, 1, -3])
 # Randomly choosen weights
-w = np.array([[0.34, 0.1, 0.5, -0.7],
-              [0.14, 0.4, 0.2, -0.5],
-              [-0.34, -0.3, -0.5, 0.7]])
+w = np.random.normal(0, scale=0.1, size=(3, 4))
 # Randomly choosen bias
-b = np.array([0, 1, -2])
+b = np.random.randint(10, size=3).ravel()
 # Wanted Output
 y = np.array([0.5, 0.1, 0.9])
 # Estimated Output
@@ -74,6 +71,7 @@ if(not dim_x == len(x)):
 
 
 """ Training """
+
 score = 97
 max_iterations = 1000
 accuracy_score = calc_accuracy(y, sigmoid(w, b, x))
