@@ -24,8 +24,8 @@ def sigmoid(w, b, x):
 def train(w, b, x):
     y_est = sigmoid(w, b, x)
     error = y - y_est
-    d_w = learning_rate * np.outer(error, x)
-    d_b = learning_rate * error
+    d_w = 2*learning_rate * np.outer(error, x)
+    d_b = 2*learning_rate * error
     w = w+d_w
     b = b+d_b
     return w, b, y_est
